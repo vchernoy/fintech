@@ -33,6 +33,23 @@ def compute(annual_interest_rate, P, days, D):
     return total_interest, remaining_balance
 
 
+def compute_days(annual_interest_rate, P, D, max_days=None):
+    daily_rate = annual_interest_rate / 365  # Daily interest rate
+
+    remaining_balance = P
+    total_interest = 0
+
+    day = 0
+    while day < (max_days or (day + 1)) and remaining_balance > 0:
+        daily_interest = remaining_balance * daily_rate  # Interest accrues first
+        total_interest += daily_interest  # Track total interest paid
+        remaining_balance += daily_interest  # Add interest to balance
+        remaining_balance -= D  # Then make the daily payment
+        day += 1
+
+    return total_interest, remaining_balance, day
+
+
 def pay_interest_only(annual_interest_rate, P, days, monthly_payments):
     daily_rate = annual_interest_rate / 365  # Daily interest rate
 
@@ -210,6 +227,10 @@ def velocity(mortgage_balance, mortgage_rate, monthly_payment, P, heloc_interest
     )
     # D = P / 30
     # compute(annual_interest_rate, P, days, D)
+    D = (monthly_payment + A) / 30
+    interest, remaining_balance, days = compute_days(heloc_interest_rate, P, D)
+    total_months += days / 30
+    print(f"{total_months=}, {remaining_balance=}, {days=}")
 
     total_interest, total_months, remaining_balance = mortgage(
         mortgage_balance, mortgage_rate, monthly_payment + A
@@ -251,6 +272,5 @@ hysa_mortgage(mortgage_balance, mortgage_rate, monthly_payment, hysa_balance)
 heloc_mortgage(mortgage_balance, mortgage_rate, monthly_payment, P)
 repeat_hysa_mortgage(mortgage_balance, mortgage_rate, monthly_payment, hysa_balance)
 repeat_heloc_mortgage(mortgage_balance, mortgage_rate, monthly_payment, P)
-
 
 velocity(mortgage_balance, mortgage_rate, monthly_payment, P * 10, heloc_interest_rate)
